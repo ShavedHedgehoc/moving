@@ -1,56 +1,19 @@
-services:
-  # app:
-  #   container_name: app_container
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.prod
-  #     args:
-  #       - NODE_ENV=production
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
-  #   restart: always
-  #   ports:
-  #     - "80:80"
+version: "3.8"
 
-  app:
-    container_name: app_container
+services:
+  frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile.prod
-      args:
-        - NODE_ENV=production
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: always
-    networks:
-      - general
+    environment:
+      - NODE_ENV=production # Or production
 
   nginx:
-    container_name: nginx_container
-    build: ./docker/nginx
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: always
+    image: nginx:alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/dist:/usr/share/nginx/html # Mount the built Vite app
     ports:
       - "80:80"
-    networks:
-      - general
     depends_on:
-      - app
-
-networks:
-  general:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
-          gateway: 172.18.0.1
+      - frontend # Ensure frontend is built before NGINX starts
