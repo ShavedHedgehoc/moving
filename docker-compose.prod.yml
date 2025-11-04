@@ -1,17 +1,16 @@
 services:
-  frontend:
+  app:
+    container_name: app_container
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile.prod
-    environment:
-      - NODE_ENV=production # Or production
-
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./frontend/dist:/usr/share/nginx/html # Mount the built Vite app
+      args:
+        - NODE_ENV=production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
     ports:
       - "80:80"
-    depends_on:
-      - frontend # Ensure frontend is built before NGINX starts
