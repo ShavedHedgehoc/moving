@@ -1,4 +1,20 @@
 services:
+  # app:
+  #   container_name: app_container
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.prod
+  #     args:
+  #       - NODE_ENV=production
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+
   app:
     container_name: app_container
     build:
@@ -11,6 +27,32 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - general
+
+  nginx:
+    container_name: nginx_container
+    build: ./docker/nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: always
     ports:
       - "80:80"
+    networks:
+      - general
+    depends_on:
+      - app
+
+networks:
+  general:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
